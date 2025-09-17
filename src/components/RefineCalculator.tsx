@@ -31,16 +31,18 @@ const refineData: RefineData[] = [
 export default function RefineCalculator() {
   const [itemPrice, setItemPrice] = useState<string>("");
   const [oriEluPrice, setOriEluPrice] = useState<string>("");
+  const [equipmentPrice, setEquipmentPrice] = useState<string>("");
   const [startLevel, setStartLevel] = useState<number>(4);
   const [targetLevel, setTargetLevel] = useState<number>(7);
   const [calculations, setCalculations] = useState<any[]>([]);
 
   const calculateRefineCost = () => {
-    if (!oriEluPrice) return;
+    if (!oriEluPrice || !equipmentPrice) return;
 
     const oriEluCost = parseFloat(oriEluPrice);
+    const eqPrice = parseFloat(equipmentPrice);
     
-    if (isNaN(oriEluCost)) return;
+    if (isNaN(oriEluCost) || isNaN(eqPrice)) return;
 
     const results = [];
     let totalCost = 0;
@@ -52,7 +54,8 @@ export default function RefineCalculator() {
 
     for (const refine of relevantRefines) {
       const materialCost = (oriEluCost * refine.oriEluCost);
-      const levelCost = refine.zenyCost + materialCost;
+      const equipmentCost = (eqPrice * refine.eqCost);
+      const levelCost = refine.zenyCost + materialCost + equipmentCost;
       
       totalCost += levelCost;
 
@@ -63,6 +66,7 @@ export default function RefineCalculator() {
         eqNeeded: refine.eqCost,
         zenyCost: refine.zenyCost,
         materialCost,
+        equipmentCost,
         levelCost,
         cumulativeCost: totalCost
       });
@@ -73,7 +77,7 @@ export default function RefineCalculator() {
 
   useEffect(() => {
     calculateRefineCost();
-  }, [oriEluPrice, startLevel, targetLevel]);
+  }, [oriEluPrice, equipmentPrice, startLevel, targetLevel]);
 
   const formatZeny = (amount: number) => {
     return new Intl.NumberFormat('pt-BR').format(amount);
@@ -117,6 +121,20 @@ export default function RefineCalculator() {
                     placeholder="Ex: 150000"
                     value={oriEluPrice}
                     onChange={(e) => setOriEluPrice(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="equipmentPrice" className="text-sm font-medium">
+                    Preço do Equipamento (Zeny)
+                  </Label>
+                  <Input
+                    id="equipmentPrice"
+                    type="number"
+                    placeholder="Ex: 50000"
+                    value={equipmentPrice}
+                    onChange={(e) => setEquipmentPrice(e.target.value)}
                     className="mt-1"
                   />
                 </div>
@@ -171,7 +189,7 @@ export default function RefineCalculator() {
 
             {calculations.length > 0 ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="p-4 rounded-lg bg-gradient-primary/10 border border-primary/20">
                     <div className="flex items-center gap-2">
                       <Shield className="w-5 h-5 text-primary" />
@@ -192,7 +210,17 @@ export default function RefineCalculator() {
                     </p>
                   </div>
 
-                  <div className="md:col-span-2 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <div className="flex items-center gap-2">
+                      <Sword className="w-5 h-5 text-blue-400" />
+                      <span className="text-sm font-medium">Equipamentos Total</span>
+                    </div>
+                    <p className="text-2xl font-bold text-blue-400">
+                      {calculations.reduce((sum, calc) => sum + calc.eqNeeded, 0)} unidades
+                    </p>
+                  </div>
+
+                  <div className="md:col-span-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                     <div className="flex items-center gap-2">
                       <Shield className="w-5 h-5 text-green-400" />
                       <span className="text-sm font-medium">Garantia de Sucesso</span>
