@@ -1,6 +1,8 @@
 # ROMC Refine Calculator
 
-Uma calculadora de refino para Ragnarok Online que permite calcular os custos totais para refinar equipamentos do nível 4 ao 15.
+Uma calculadora de refino para Ragnarok Online que permite calcular os custos totais para refinar equipamentos do nível +4 ao +15.
+
+Projeto instanciado em: https://nevesb.github.io/romc-refine/
 
 ## 📋 Sobre o Projeto
 
