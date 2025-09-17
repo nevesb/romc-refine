@@ -1,73 +1,113 @@
-# Welcome to your Lovable project
+# ROMC Refine Calculator
 
-## Project info
+Uma calculadora de refino para Ragnarok Online que permite calcular os custos totais para refinar equipamentos do nível 4 ao 15.
 
-**URL**: https://lovable.dev/projects/35e458e5-a0eb-4ee7-90c5-2347e00b5a79
+## 📋 Sobre o Projeto
 
-## How can I edit this code?
+Esta aplicação web foi desenvolvida para ajudar jogadores de Ragnarok Online a calcular os custos de refino de equipamentos. A calculadora considera os preços de Ori/Elu, equipamentos e zeny necessários para cada nível de refino.
 
-There are several ways of editing your application.
+## 🚀 Como Instalar e Executar
 
-**Use Lovable**
+### Pré-requisitos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/35e458e5-a0eb-4ee7-90c5-2347e00b5a79) and start prompting.
+- Node.js (versão 16 ou superior)
+- npm ou yarn
 
-Changes made via Lovable will be committed automatically to this repo.
+### Instalação
 
-**Use your preferred IDE**
+1. Clone o repositório:
+```bash
+git clone git@github.com:nevesb/romc-refine.git
+cd romc-refine
+```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Instale as dependências:
+```bash
+npm install
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Execute o projeto em modo de desenvolvimento:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Acesse a aplicação em: `http://localhost:8080/romc-refine/`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Build para Produção
 
-**Use GitHub Codespaces**
+Para gerar uma versão otimizada para produção:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm run build
+```
 
-## What technologies are used for this project?
+## 🧮 Como Funciona o Cálculo
 
-This project is built with:
+### Tabela de Refino
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+A calculadora utiliza uma tabela fixa com os custos de refino do nível 4 ao 15:
 
-## How can I deploy this project?
+| Nível | Ori/Elu | Equipamentos | Zeny |
+|-------|---------|--------------|------|
+| 4→5   | 5       | 1            | 100,000 |
+| 5→6   | 10      | 2            | 220,000 |
+| 6→7   | 15      | 3            | 470,000 |
+| 7→8   | 25      | 4            | 910,000 |
+| 8→9   | 50      | 6            | 1,630,000 |
+| 9→10  | 80      | 10           | 2,740,000 |
+| 10→11 | 135     | 22           | 5,250,000 |
+| 11→12 | 225     | 30           | 9,000,000 |
+| 12→13 | 375     | 45           | 14,500,000 |
+| 13→14 | 600     | 69           | 24,500,000 |
+| 14→15 | 900     | 98           | 42,000,000 |
 
-Simply open [Lovable](https://lovable.dev/projects/35e458e5-a0eb-4ee7-90c5-2347e00b5a79) and click on Share -> Publish.
+### Cálculo dos Custos
 
-## Can I connect a custom domain to my Lovable project?
+1. **Preço do Item**: Valor unitário do equipamento que será usado como material
+2. **Preço Ori/Elu**: Valor unitário do Ori ou Elu no servidor
+3. **Nível Inicial e Final**: Define o range de refino desejado
 
-Yes, you can!
+O cálculo considera:
+- Quantidade de Ori/Elu necessária × Preço unitário
+- Quantidade de equipamentos necessários × Preço do item
+- Custo fixo de zeny para cada nível
+- **Custo total acumulado** para atingir o nível desejado
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Exemplo de Uso
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Para refinar uma arma do +7 ao +10:
+- Insira o preço do equipamento (ex: 1,000,000 zeny)
+- Insira o preço do Ori/Elu (ex: 50,000 zeny)
+- Selecione nível inicial: 7
+- Selecione nível final: 10
+- A calculadora mostrará o custo para cada nível e o total acumulado
+
+## 🌐 Funcionalidades
+
+- ✅ Cálculo de custos de refino por nível
+- ✅ Suporte a múltiplos idiomas (Português/Inglês)
+- ✅ Interface responsiva e moderna
+- ✅ Cálculo automático em tempo real
+- ✅ Exibição de custos individuais e acumulados
+
+## 🛠️ Tecnologias Utilizadas
+
+- **React** - Biblioteca para interface de usuário
+- **TypeScript** - Superset do JavaScript com tipagem estática
+- **Vite** - Build tool e dev server
+- **Tailwind CSS** - Framework CSS utilitário
+- **shadcn/ui** - Componentes de UI
+- **Lucide React** - Ícones
+
+## 📱 Interface
+
+A aplicação possui uma interface limpa e intuitiva com:
+- Formulário para inserção de preços
+- Seletor de níveis de refino
+- Tabela de resultados com custos detalhados
+- Alternador de idiomas
+- Design responsivo para desktop e mobile
+
+## 🎯 Créditos
+
+Desenvolvido por **Grimphos @ Classic Global**
