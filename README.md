@@ -6,7 +6,7 @@ Projeto instânciado em: https://nevesb.github.io/romc-refine/
 
 ## 📋 Sobre o Projeto
 
-Esta aplicação web foi desenvolvida para ajudar jogadores de Ragnarok M Classic a calcular os custos de refino de equipamentos. A calculadora considera os preços de Ori/Elu, equipamentos e zeny necessários para cada nível de refino.
+Esta aplicação web foi desenvolvida para ajudar jogadores de Ragnarok M Classic a calcular os custos de refino de equipamentos. A calculadora considera os preços dos materiais de refino (Oridecon e Elunium), quantidade de equipamentos e zeny necessários para cada nível de refino.
 
 ## 🚀 Como Instalar e Executar
 
@@ -47,7 +47,7 @@ npm run build
 
 ### Tabela de Refino
 
-A calculadora utiliza uma tabela fixa com os custos de refino do nível 4 ao 15:
+A calculadora utiliza uma tabela fixa com os custos de refino do nível +4 ao +15:
 
 | Nível | Ori/Elu | Equipamentos | Zeny |
 |-------|---------|--------------|------|
