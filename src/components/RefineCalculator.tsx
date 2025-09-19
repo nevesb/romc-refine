@@ -155,7 +155,7 @@ export default function RefineCalculator() {
                     {t('form.fromLevel')}
                   </Label>
                   <div className="grid grid-cols-4 gap-2 mt-2">
-                    {[4, 5, 6, 7, 8, 9, 10, 11].map((level) => (
+                    {[4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((level) => (
                       <Button
                         key={level}
                         variant={startLevel === level ? "default" : "outline"}
