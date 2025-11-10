@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sword, Shield, Calculator, Coins } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Sword, Shield, Calculator, Coins, Sparkles } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { LanguageSelector } from "./LanguageSelector";
 
@@ -16,7 +17,7 @@ interface RefineData {
   zenyCost: number;
 }
 
-const refineData: RefineData[] = [
+const normalRefineData: RefineData[] = [
   { fromLevel: 4, toLevel: 5, oriEluCost: 5, eqCost: 1, zenyCost: 100000 },
   { fromLevel: 5, toLevel: 6, oriEluCost: 10, eqCost: 2, zenyCost: 220000 },
   { fromLevel: 6, toLevel: 7, oriEluCost: 15, eqCost: 3, zenyCost: 470000 },
@@ -30,14 +31,31 @@ const refineData: RefineData[] = [
   { fromLevel: 14, toLevel: 15, oriEluCost: 900, eqCost: 98, zenyCost: 42000000 },
 ];
 
+const eventRefineData: RefineData[] = [
+  { fromLevel: 4, toLevel: 5, oriEluCost: 4, eqCost: 1, zenyCost: 80000 },
+  { fromLevel: 5, toLevel: 6, oriEluCost: 8, eqCost: 2, zenyCost: 176000 },
+  { fromLevel: 6, toLevel: 7, oriEluCost: 12, eqCost: 2, zenyCost: 376000 },
+  { fromLevel: 7, toLevel: 8, oriEluCost: 20, eqCost: 3, zenyCost: 728000 },
+  { fromLevel: 8, toLevel: 9, oriEluCost: 40, eqCost: 5, zenyCost: 1304000 },
+  { fromLevel: 9, toLevel: 10, oriEluCost: 68, eqCost: 8, zenyCost: 2192000 },
+  { fromLevel: 10, toLevel: 11, oriEluCost: 108, eqCost: 18, zenyCost: 4200000 },
+  { fromLevel: 11, toLevel: 12, oriEluCost: 180, eqCost: 24, zenyCost: 7200000 },
+  { fromLevel: 12, toLevel: 13, oriEluCost: 300, eqCost: 36, zenyCost: 11600000 },
+  { fromLevel: 13, toLevel: 14, oriEluCost: 480, eqCost: 55, zenyCost: 19600000 },
+  { fromLevel: 14, toLevel: 15, oriEluCost: 720, eqCost: 78, zenyCost: 33600000 },
+];
+
 export default function RefineCalculator() {
   const { t } = useLanguage();
   const [itemPrice, setItemPrice] = useState<string>("");
   const [oriEluPrice, setOriEluPrice] = useState<string>("");
   const [equipmentPrice, setEquipmentPrice] = useState<string>("");
+  const [ownedOriElu, setOwnedOriElu] = useState<string>("");
+  const [ownedEquipment, setOwnedEquipment] = useState<string>("");
   const [startLevel, setStartLevel] = useState<number>(4);
   const [targetLevel, setTargetLevel] = useState<number>(7);
   const [calculations, setCalculations] = useState<any[]>([]);
+  const [isEventActive, setIsEventActive] = useState<boolean>(false);
 
   const calculateRefineCost = () => {
     if (!oriEluPrice || !equipmentPrice) return;
@@ -50,8 +68,8 @@ export default function RefineCalculator() {
     const results = [];
     let totalCost = 0;
 
-    // Filtrar apenas os níveis relevantes
-    const relevantRefines = refineData.filter(
+    // Filtrar apenas os níveis relevantes da tabela ativa
+    const relevantRefines = (isEventActive ? eventRefineData : normalRefineData).filter(
       refine => refine.fromLevel >= startLevel && refine.toLevel <= targetLevel
     );
 
@@ -80,11 +98,26 @@ export default function RefineCalculator() {
 
   useEffect(() => {
     calculateRefineCost();
-  }, [oriEluPrice, equipmentPrice, startLevel, targetLevel]);
+  }, [oriEluPrice, equipmentPrice, startLevel, targetLevel, isEventActive]);
 
   const formatZeny = (amount: number) => {
     return new Intl.NumberFormat('pt-BR').format(amount);
   };
+  const compactLabelClass = "text-sm font-medium flex items-end leading-tight min-h-[38px]";
+
+  const totalOriEluNeeded = calculations.reduce((sum, calc) => sum + (calc.oriEluNeeded || 0), 0);
+  const totalEquipmentsNeeded = calculations.reduce((sum, calc) => sum + (calc.eqNeeded || 0), 0);
+  const grossTotalCost = calculations.length > 0 ? (calculations[calculations.length - 1]?.cumulativeCost || 0) : 0;
+  const oriEluUnitPrice = parseFloat(oriEluPrice || "0") || 0;
+  const equipmentUnitPrice = parseFloat(equipmentPrice || "0") || 0;
+  const ownedOriEluCount = Math.max(0, parseFloat(ownedOriElu || "0") || 0);
+  const ownedEquipmentCount = Math.max(0, parseFloat(ownedEquipment || "0") || 0);
+  const oriEluStockUsed = Math.min(totalOriEluNeeded, ownedOriEluCount);
+  const equipmentStockUsed = Math.min(totalEquipmentsNeeded, ownedEquipmentCount);
+  const oriEluToBuy = Math.max(totalOriEluNeeded - oriEluStockUsed, 0);
+  const equipmentToBuy = Math.max(totalEquipmentsNeeded - equipmentStockUsed, 0);
+  const stockSavings = oriEluStockUsed * oriEluUnitPrice + equipmentStockUsed * equipmentUnitPrice;
+  const netTotalCost = Math.max(grossTotalCost - stockSavings, 0);
 
   return (
     <div className="min-h-screen bg-gradient-bg p-4">
@@ -121,33 +154,88 @@ export default function RefineCalculator() {
             <h2 className="text-xl font-semibold">{t('form.title')}</h2>
           </div>
 
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-full bg-primary/15 text-primary shadow-inner">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{t('event.toggleLabel')}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isEventActive ? t('event.activeDescription') : t('event.inactiveDescription')}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={isEventActive}
+                  onCheckedChange={setIsEventActive}
+                  aria-label={t('event.ariaLabel')}
+                />
+              </div>
+
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="oriEluPrice" className="text-sm font-medium">
-                    {t('form.oriEluPrice')}
-                  </Label>
-                  <Input
-                    id="oriEluPrice"
-                    type="number"
-                    placeholder={t('form.oriEluPrice.placeholder')}
-                    value={oriEluPrice}
-                    onChange={(e) => setOriEluPrice(e.target.value)}
-                    className="mt-1"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="oriEluPrice" className={compactLabelClass}>
+                        {t('form.oriEluPrice')}
+                      </Label>
+                      <Input
+                        id="oriEluPrice"
+                        type="number"
+                        placeholder={t('form.oriEluPrice.placeholder')}
+                        value={oriEluPrice}
+                        onChange={(e) => setOriEluPrice(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="oriEluOwned" className={compactLabelClass}>
+                        {t('form.oriEluOwned')}
+                      </Label>
+                      <Input
+                        id="oriEluOwned"
+                        type="number"
+                        min={0}
+                        placeholder={t('form.oriEluOwned.placeholder')}
+                        value={ownedOriElu}
+                        onChange={(e) => setOwnedOriElu(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="equipmentPrice" className="text-sm font-medium">
-                    {t('form.equipmentPrice')}
-                  </Label>
-                  <Input
-                    id="equipmentPrice"
-                    type="number"
-                    placeholder={t('form.equipmentPrice.placeholder')}
-                    value={equipmentPrice}
-                    onChange={(e) => setEquipmentPrice(e.target.value)}
-                    className="mt-1"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="equipmentPrice" className={compactLabelClass}>
+                        {t('form.equipmentPrice')}
+                      </Label>
+                      <Input
+                        id="equipmentPrice"
+                        type="number"
+                        placeholder={t('form.equipmentPrice.placeholder')}
+                        value={equipmentPrice}
+                        onChange={(e) => setEquipmentPrice(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="equipmentOwned" className={compactLabelClass}>
+                        {t('form.equipmentOwned')}
+                      </Label>
+                      <Input
+                        id="equipmentOwned"
+                        type="number"
+                        min={0}
+                        placeholder={t('form.equipmentOwned.placeholder')}
+                        value={ownedEquipment}
+                        onChange={(e) => setOwnedEquipment(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -197,6 +285,16 @@ export default function RefineCalculator() {
               <Coins className="w-5 h-5 text-golden" />
               <h2 className="text-xl font-semibold">{t('results.title')}</h2>
             </div>
+            {isEventActive && (
+              <div className="mb-4 rounded-lg border border-dashed border-golden/40 bg-golden/10 p-4">
+                <Badge className="bg-golden/20 text-golden border-0">
+                  {t('event.activeBadge')}
+                </Badge>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {t('event.activeHelper')}
+                </p>
+              </div>
+            )}
 
             {calculations.length > 0 ? (
               <div className="space-y-4">
@@ -207,8 +305,17 @@ export default function RefineCalculator() {
                       <span className="text-sm font-medium">{t('results.totalCost')}</span>
                     </div>
                     <p className="text-2xl font-bold text-primary">
-                      {formatZeny(calculations[calculations.length - 1]?.cumulativeCost || 0)} z
+                      {formatZeny(netTotalCost)} z
                     </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t('results.netAfterInventory')}
+                    </p>
+                    {stockSavings > 0 && (
+                      <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                        <p>{t('results.grossCost')}: {formatZeny(grossTotalCost)} z</p>
+                        <p>{t('results.stockSavings')}: -{formatZeny(stockSavings)} z</p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="p-4 rounded-lg bg-golden/10 border border-golden/20">
@@ -217,8 +324,15 @@ export default function RefineCalculator() {
                       <span className="text-sm font-medium">{t('results.oriEluTotal')}</span>
                     </div>
                     <p className="text-2xl font-bold text-golden">
-                      {calculations.reduce((sum, calc) => sum + calc.oriEluNeeded, 0)} {t('results.units')}
+                      {formatZeny(totalOriEluNeeded)} {t('results.units')}
                     </p>
+                    {oriEluStockUsed > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('results.stockBreakdown')
+                          .replace('{stock}', formatZeny(oriEluStockUsed))
+                          .replace('{buy}', formatZeny(oriEluToBuy))}
+                      </p>
+                    )}
                   </div>
 
                   <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
@@ -227,8 +341,15 @@ export default function RefineCalculator() {
                       <span className="text-sm font-medium">{t('results.equipmentsTotal')}</span>
                     </div>
                     <p className="text-2xl font-bold text-blue-400">
-                      {calculations.reduce((sum, calc) => sum + calc.eqNeeded, 0)} {t('results.units')}
+                      {formatZeny(totalEquipmentsNeeded)} {t('results.units')}
                     </p>
+                    {equipmentStockUsed > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t('results.stockBreakdown')
+                          .replace('{stock}', formatZeny(equipmentStockUsed))
+                          .replace('{buy}', formatZeny(equipmentToBuy))}
+                      </p>
+                    )}
                   </div>
 
                   <div className="md:col-span-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
